@@ -1,18 +1,15 @@
 name: Deploy to GitHub Pages
 
-# Trigger the workflow on push to the main branch
 on:
   push:
     branches:
-      - main  # Change to your default branch if different (e.g., master)
+      - main  # Change to your default branch if different
 
-# Permissions required for deployment
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Concurrency to avoid multiple deployments running simultaneously
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -24,22 +21,26 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      # Checkout the repository
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Set up Node.js (optional, only if you need to process assets)
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
-      # Deploy to GitHub Pages
+      - name: Verify Files
+        run: |
+          ls -la
+          if [ ! -f index.html ]; then echo "Error: index.html not found. Please rename index(.1).html to index.html" && exit 1; fi
+          if [ ! -f men.gif ]; then echo "Error: men.gif not found" && exit 1; fi
+          if [ ! -f men.mp3 ]; then echo "Error: men.mp3 not found" && exit 1; fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Path to the folder containing your HTML and assets
+          # Use '.' for the repository root
+          path: .
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          # Specify the folder containing your HTML and assets
-          # If your HTML file and assets (men.gif, men.mp3) are in the root, use '.'
-          # If they're in a subfolder (e.g., 'public'), specify that folder
-          artifact: .
